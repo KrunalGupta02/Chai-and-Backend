@@ -1,0 +1,23 @@
+{
+  "name": "04.-chai-and-backend",
+  "version": "1.0.0",
+  "description": "Repo for the chai and backend course ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KrunalGupta02/Chai-and-Backend.git"
+  },
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "author": "Krunal Gupta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KrunalGupta02/Chai-and-Backend/issues"
+  },
+  "homepage": "https://github.com/KrunalGupta02/Chai-and-Backend#readme"
+}
