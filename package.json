@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Repo for the chai and backend course ",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -19,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/KrunalGupta02/Chai-and-Backend/issues"
   },
-  "homepage": "https://github.com/KrunalGupta02/Chai-and-Backend#readme"
+  "homepage": "https://github.com/KrunalGupta02/Chai-and-Backend#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
 }
