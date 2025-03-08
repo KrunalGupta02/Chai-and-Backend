@@ -24,6 +24,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // 9) Return response
 
   const { fullName, email, username, password } = req.body;
+
   console.log("email: ", email);
 
   //? Validation on data
@@ -39,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // check if user already exists for not
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     // $or is mongodb operator
     //? Use the $or operator to perform a logical OR operation on an array of expressions and select documents that satisfy at least one of the expressions.
     $or: [{ email }, { username }],
@@ -53,7 +54,15 @@ const registerUser = asyncHandler(async (req, res) => {
   //? this avatar and coverImage coming from user.routes.js middleware
   const avatarLocalPath = req.files?.avatar[0]?.path;
 
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage && req.files.coverImage.length > 0)
+  ) {
+    coverImage = req.files.coverImage.avatar[0].path;
+  }
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
