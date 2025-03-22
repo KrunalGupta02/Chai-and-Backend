@@ -47,7 +47,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const { fullName, email, username, password } = req.body;
 
-  console.log("username: ", email);
+  // console.log("username: ", email);
+  console.log("Req body", req.body);
 
   //? Validation on data
   // if (fullName === "") {
@@ -83,7 +84,7 @@ const registerUser = asyncHandler(async (req, res) => {
     req.files &&
     Array.isArray(req.files.coverImage && req.files.coverImage.length > 0)
   ) {
-    coverImage = req.files.coverImage.avatar[0].path;
+    coverImageLocalPath = req.files.coverImage[0].path;
   }
 
   if (!avatarLocalPath) {
@@ -141,7 +142,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "username or email is required");
   }
 
-  // Here is an alternative of above code
+  // Here is an alternative of above code if any data is available
   /*
   if(!(username || email)){
     throw new ApiError(400,'username or email is required');
@@ -199,6 +200,14 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+/*
+User: This is the model (class) used to interact with the database.
+It's used when you're calling methods like User.findOne(), User.create(), User.findById(), etc.
+
+user: This is an instance (document) of the User model representing a single user in your database.
+This is the actual instance of the user in the database, and you can access its properties like user.email, user.username, etc.
+ */
+
 const logOutUser = asyncHandler(async (req, res) => {
   // Steps:-
   /*
@@ -235,7 +244,7 @@ const refreshAccessToken = await asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshAccessToken || req.body.refreshToken;
 
-  if (!refreshAccessToken) {
+  if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request");
   }
 
@@ -260,8 +269,7 @@ const refreshAccessToken = await asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const { accessToken, newRefreshToken } =
-      await generateAccessAndRefreshTokens(user._id);
+    const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
 
     return res
       .status(200)

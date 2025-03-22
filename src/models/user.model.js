@@ -51,6 +51,7 @@ const userScheme = new Schema(
 
 // This is mongodb hooks used for middleware means this 'pre' hook is used to do something before saving the data .
 userScheme.pre("save", async function (next) {
+  // If password is not modified then don't hash it again
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 10);

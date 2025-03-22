@@ -1,4 +1,4 @@
-// This middleware verifies is user is available for not
+// This middleware verifies is user is available or not
 
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
