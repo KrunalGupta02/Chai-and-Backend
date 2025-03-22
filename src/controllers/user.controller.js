@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -80,11 +80,8 @@ const registerUser = asyncHandler(async (req, res) => {
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
   let coverImageLocalPath;
-  if (
-    req.files &&
-    Array.isArray(req.files.coverImage && req.files.coverImage.length > 0)
-  ) {
-    coverImageLocalPath = req.files.coverImage[0].path;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+    coverImageLocalPath = req.files.coverImage[0].path
   }
 
   if (!avatarLocalPath) {
@@ -344,6 +341,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Avatar file is missing')
   }
 
+  //TODO:- Delete Old image - assignment
+  if (req.user.avatar) {
+    console.log('req.user.avatar', req.user.avatar)
+    const publicId = req.user.avatar.split('/').pop().split('.')[0];
+    await deleteFromCloudinary(publicId)
+  }
+
   const avatar = await uploadOnCloudinary(avatarLocalPath)
 
   if (!avatar.url) {
@@ -363,8 +367,21 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path
 
-  if (coverImageLocalPath) {
+  if (!coverImageLocalPath) {
     throw new ApiError(400, 'Cover Image file is missing')
+  }
+
+  //TODO:- Delete Old image - assignment
+  /*
+  - delete it after uploding the new image
+  - make utility function for deleting the image
+  - take the old url from the user object
+  - and delete it
+  */
+
+  if (req.user.coverImage) {
+    const publicId = req.user.coverImage.split('/').pop().split('.')[0];
+    await deleteFromCloudinary(publicId)
   }
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath)
