@@ -63,7 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Full name is required");
   }
 
-  // check if user already exists for not
+  // check if user already exists or not
   const existedUser = await User.findOne({
     // $or is mongodb operator
     //? Use the $or operator to perform a logical OR operation on an array of expressions and select documents that satisfy at least one of the expressions.
@@ -85,6 +85,7 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImageLocalPath = req.files.coverImage[0].path
   }
 
+  // only avatar is checked bcz coverImage is not compulsory
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
@@ -114,7 +115,7 @@ const registerUser = asyncHandler(async (req, res) => {
   );
 
   if (!createdUser) {
-    throw new ApiError(500, "Something went wront while registering the user");
+    throw new ApiError(500, "Something went wrong while registering the user");
   }
 
   // Returing the response
@@ -164,9 +165,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   // Make the access and refesh
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id
-  );
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
   // Now send it to cookies
 
@@ -199,7 +198,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 /*
-User: This is the model (class) used to interact with the database.
+User: This is the "model" (class) used to interact with the database.
 It's used when you're calling methods like User.findOne(), User.create(), User.findById(), etc.
 
 user: This is an instance (document) of the User model representing a single user in your database.
@@ -410,8 +409,11 @@ const userChannelProfile = asyncHandler(async (req, res) => {
 
   const channel = await User.aggregate([
     {
+      // filters the User collection based on the username provided on params.
       $match: username?.toLowerCase()
-    }, {
+    },
+    // Performing a "join" with the subscriptions collection. It finds all documents in subscriptions where the channel field matches the current user’s _id (the user's channel). It populates an array called subscribers, which represents all the people who are subscribed to this user’s channel.
+    {
       $lookup: {
         from: "subscriptions",
         localField: "_id",
@@ -419,6 +421,7 @@ const userChannelProfile = asyncHandler(async (req, res) => {
         as: 'subscribers'
       }
     },
+    // This is another "join" with the subscriptions collection, but now it finds all documents where the subscriber field matches the current user’s _id. It creates an array called subscribedTo, representing the users this channel is subscribed to.
     {
       $lookup: {
         from: "subscriptions",
@@ -427,6 +430,12 @@ const userChannelProfile = asyncHandler(async (req, res) => {
         as: 'subscribedTo'
       }
     },
+    /* This step is adding new fields to each user document:
+    ==> subscriberCount: The number of people subscribed to this user's channel (using $size to count the subscribers array).
+
+    ==> channelSubscribedToCount: The number of channels the user is subscribed to(using $size to count the subscribedTo array).
+
+    ==> isSubscribed: A boolean indicating if the current authenticated user(req.user?._id) is subscribed to this user's channel. It checks if the user’s ID is in the subscribers array, returning true if they are, otherwise false*/
     {
       $addFields: {
         subscriberCount: {
@@ -444,6 +453,7 @@ const userChannelProfile = asyncHandler(async (req, res) => {
         }
       }
     },
+    // Which fields should be included in the final result
     {
       $project: {
         fullName: 1,
@@ -473,10 +483,12 @@ const userChannelProfile = asyncHandler(async (req, res) => {
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
+      // Filters the User collection to find the user by req.user_id.
       $match: {
         _id: new mongoose.Types.ObjectId(req.user_id)
       }
     },
+    //  Joins the videos collection to get the user's watch history, based on the video IDs stored in the user's watchHistory array.
     {
       $lookup: {
         from: 'vidoes',
@@ -485,6 +497,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         as: "watchHistory",
         pipeline: [
           {
+            // For each video, it looks up the video's owner from the users collection and includes their fullName, username, and avatar.
             $lookup: {
               from: "users",
               localField: 'owner',
